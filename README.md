@@ -22,6 +22,8 @@
 
 #### Tested example: python ".\web-source-code_downloader.py" https://sagarbiswas-multihat.github.io/ --depth 2
 
+<br>
+
 <div align="center">
     
 ![downloaded elements](https://imgur.com/8yCIRkQ.png)
