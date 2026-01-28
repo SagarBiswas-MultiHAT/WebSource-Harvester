@@ -10,6 +10,24 @@ Tested example: python ".\web-source-code_downloader.py" https://sagarbiswas-mul
 
 ---
 
+![](https://imgur.com/WS98QtD.png)
+
+<br>
+
+---
+
+![after running the project](https://imgur.com/luk0aqV.png)
+
+<br>
+
+---
+
+![downloaded elements](https://imgur.com/8yCIRkQ.png)
+
+<br>
+
+---
+
 ## Overview
 
 This project is an **educational website source code downloader and crawler** that extracts and reconstructs **everything a browser can observe** from a given URL.
