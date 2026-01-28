@@ -1,80 +1,226 @@
-# Web Source Code Downloader
+# Web Source Code Downloader & Crawler
 
-![web-source-code_downloader](https://scontent.fdac138-2.fna.fbcdn.net/v/t39.30808-6/471830853_122132259044552158_3565479281626046296_n.jpg?stp=dst-jpg_p526x296_tt6&_nc_cat=106&ccb=1-7&_nc_sid=127cfc&_nc_ohc=AejDNtbRnX0Q7kNvgEZc5r2&_nc_zt=23&_nc_ht=scontent.fdac138-2.fna&_nc_gid=AIJFI8o8g89A7N9Fv0OfCCA&oh=00_AYCmxd-6b43GdRnGunI4zEWRsUVMefAOcg4VFWbwz2BybQ&oe=6778C996)
+**Author:** @SagarBiswas-MultiHAT \
+**Category:** Educational Web Crawling & Client-Side Security Analysis \
+**Status:** Learning-grade, interview-safe, portfolio-ready
 
-This Python script allows you to easily download the HTML source code of any website. Just input the website URL, and the script will fetch the source code and save it as an `HTML` file on your computer. It's simple, lightweight, and perfect for saving or analyzing web pages locally.
-
-## Features
-
-- Fetches the HTML source code of any website.
-- Saves the content as a `.html` file in the local directory.
-- Displays an ASCII art banner and colorful terminal output.
-- Easy-to-use interface that only requires the website URL.
-
-## Requirements
-
-Before running the script, you'll need to install the following Python libraries:
-
-- `pyfiglet` – Used for generating ASCII art banners.
-- `termcolor` – Adds color to terminal output.
-
-You can install these using `pip`:
-
-```bash
-pip install pyfiglet termcolor
-```
-
-## How to Use
-
-1. Clone or download this repository to your computer.
-2. Install the necessary dependencies (as mentioned above).
-3. Run the script with:
-
-   ```bash
-   python3 web_source_code_downloader.py
-   ```
-
-4. Enter the website URL when prompted (make sure to include `http://` or `https://`).
-5. The source code will be saved as `web_source_code.html` in the same directory.
-
-## Example
-
-```bash
-$ python3 web_source_code_downloader.py
-..:: Enter the website name (including http:// or https://): https://example.com
---> The source code has been saved to: web_source_code.html
-```
-
-## Optional: Using a Virtual Environment
-
-For better package management, it’s recommended to run the script inside a virtual environment. Here's how to set it up:
-
-1. Create a virtual environment:
-
-   ```bash
-   python3 -m venv venv
-   ```
-
-2. Activate the virtual environment:
-
-   ```bash
-   source venv/bin/activate
-   ```
-
-3. Install the dependencies:
-
-   ```bash
-   pip install pyfiglet termcolor
-   ```
-
-4. After use, deactivate the environment:
-
-   ```bash
-   deactivate
-   ```
-
-## Author
-
-- **Sagar Biswas**
+> “This project performs depth-controlled crawling and client-side source reconstruction, capturing everything a browser can observe from a given URL, while intentionally respecting server-side trust boundaries.”
 
 ---
+
+## Overview
+
+This project is an **educational website source code downloader and crawler** that extracts and reconstructs **everything a browser can observe** from a given URL.
+
+It crawls a site with depth-controlled **BFS**, downloads client-visible resources (HTML, CSS, JS, images, fonts, PDFs, etc.), and rewrites links so the pages work **offline**, even on nested paths like `/blog/*`.
+
+The tool **respects server trust boundaries** and does **not** attempt to fetch backend code, databases, or private data.
+
+---
+
+## What this project provides (accurate scope)
+
+This tool captures **everything a browser can retrieve** from a URL:
+
+- HTML pages (multiple pages via crawling)
+- Linked CSS files
+- JavaScript files
+- Images (including `srcset`)
+- Fonts and media files
+- PDFs and other static assets
+- XML files (e.g., `sitemap.xml`)
+- Correct offline reconstruction via path rewriting
+
+Ideal for:
+
+- Learning how real websites are structured
+- Offline inspection and analysis
+- Client-side security research
+- Understanding exposure and attack surface
+- Portfolio demonstrations of crawling logic
+
+---
+
+## What this project intentionally does NOT do
+
+By design, this project does **not**:
+
+- Download backend source code (PHP, Python, Node.js, etc.)
+- Access databases or APIs that require authentication
+- Execute JavaScript (SPA/React/Vue rendering)
+- Bypass authentication, paywalls, or access controls
+- Retrieve secrets, tokens, or server configuration
+
+These limitations are **intentional** and make the project accurate and interview-safe.
+
+---
+
+## Key features
+
+- **Depth-controlled crawling** (`--depth 2` or `--depth 1-2`)
+- **Breadth-First Search (BFS)** for reliable depth measurement
+- **Crawl vs analyze separation** to control what gets saved
+- **Same-origin enforcement** (no external domain crawling)
+- **Offline-safe path rewriting** for nested pages
+- **Asset handling** for `src`, `href`, and `srcset`
+- **URL decoding** (`%20` → spaces)
+- **Query collision handling** via hash suffix
+- **Content-type aware saving** for missing extensions
+- **XML-aware parsing** for sitemaps and RSS
+
+---
+
+## How depth works (`--depth`)
+
+Depth is measured in **link hops** from the base URL:
+
+- `0` → only the base URL
+- `1` → base URL + pages directly linked from it
+- `2` → links from depth-1 pages
+- `1-2` → crawl broadly, analyze only depth 1–2
+
+Example structure:
+
+```
+Depth 0
+└── https://example.com
+
+Depth 1
+├── /about
+├── /blog
+└── /login
+
+Depth 2
+├── /blog/post-1
+├── /blog/post-2
+└── /about/team
+```
+
+Depth control reduces noise and focuses on pages where real-world issues usually live.
+
+---
+
+## Installation
+
+Recommended: use a virtual environment.
+
+```bash
+python -m venv .venv
+```
+
+Activate:
+
+**Windows (PowerShell):**
+
+```bash
+.venv\Scripts\Activate.ps1
+```
+
+**Linux / macOS:**
+
+```bash
+source .venv/bin/activate
+```
+
+Install dependencies:
+
+1. Install from the bundled `requirements.txt` (recommended):
+
+```bash
+pip install -r requirements.txt
+```
+
+2. Or install packages individually (equivalent):
+
+```bash
+pip install beautifulsoup4 lxml
+```
+
+Notes:
+
+- `lxml` is optional but recommended (it provides a robust XML parser and removes XML parsing warnings).
+- Use the Python provided in your `.venv` when running the `pip` command to ensure packages install into the virtual environment.
+
+---
+
+## Usage
+
+```bash
+python "web-source-code_downloader" <BASE_URL> --depth <DEPTH>
+```
+
+Examples:
+
+```bash
+python "web-source-code_downloader" https://example.com --depth 0
+python "web-source-code_downloader" https://example.com --depth 1
+python "web-source-code_downloader" https://example.com --depth 1-2
+```
+
+---
+
+## Output structure (example)
+
+```
+example_com/
+├── index.html
+├── assets/
+│   ├── css/
+│   ├── js/
+│   ├── images/
+│   └── fonts/
+└── blog/
+    ├── post-1.html
+    └── post-2.html
+```
+
+All pages open **offline** without broken CSS or images.
+
+---
+
+## Why nested pages work correctly
+
+Many crawlers rewrite assets relative to the project root, which breaks pages like `/blog/post.html`.
+
+This project rewrites assets **relative to each HTML file’s directory**, so both root and nested pages load properly.
+
+---
+
+## Output behavior (important)
+
+- **Assets are saved as binary**, so images and PDFs stay intact.
+- **Pages are saved as HTML**, with rewritten local paths.
+- **External URLs** (GitHub badges, CDNs) are kept external.
+- **Fragment-only links** (`#about`) are ignored to reduce crawl noise.
+
+---
+
+## Troubleshooting
+
+- **Images missing on nested pages** → fixed by file-relative rewriting
+- **Responsive images missing** → `srcset` entries are downloaded and rewritten
+- **Resume/PDF not opening** → binary assets are saved directly
+- **XML warnings** → install `lxml` or ignore (HTML fallback is handled)
+
+---
+
+## Ethical & Legal Notice
+
+This tool is for **educational and authorized testing only**. Always respect terms of service and robots policies.
+
+---
+
+## Future improvements (optional)
+
+- Headless rendering (Playwright) for JS-heavy sites
+- robots.txt enforcement
+- JSON crawl reports
+- Security header analysis
+- Rate limiting and concurrency
+- Authentication support for authorized environments
+
+---
+
+## Final note
+
+This project is designed to be **honest, technically correct, and impressive without exaggeration**. It demonstrates strong understanding of web architecture, crawling logic, and security boundaries.
