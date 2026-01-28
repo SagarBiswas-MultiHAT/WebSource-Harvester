@@ -6,6 +6,8 @@
 
 > “This project performs depth-controlled crawling and client-side source reconstruction, capturing everything a browser can observe from a given URL, while intentionally respecting server-side trust boundaries.”
 
+Tested example: python ".\web-source-code_downloader v1.1.py" https://sagarbiswas-multihat.github.io/ --depth 2
+
 ---
 
 ## Overview
