@@ -22,7 +22,11 @@ Tested example: python ".\web-source-code_downloader.py" https://sagarbiswas-mul
 
 ---
 
+<div align="center">
+    
 ![downloaded elements](https://imgur.com/8yCIRkQ.png)
+
+</div>
 
 <br>
 
