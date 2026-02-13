@@ -20,7 +20,7 @@
 
 ---
 
-#### Tested example: python ".\web-source-code_downloader.py" https://sagarbiswas-multihat.github.io/ --depth 2
+#### Tested example: python ".\PasourceDownloader.pyssword-Strength-Checker" https://sagarbiswas-multihat.github.io/ --depth 2
 
 <br>
 
