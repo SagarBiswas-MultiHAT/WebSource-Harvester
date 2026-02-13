@@ -1,5 +1,19 @@
 # Web Source Code Downloader & Crawler
 
+<div align="right">
+
+[![Actions Status](https://github.com/SagarBiswas-MultiHAT/WebSource-Harvester/actions/workflows/get-started-with-github-actions.yml/badge.svg)](https://github.com/SagarBiswas-MultiHAT/WebSource-Harvester/actions) 
+&nbsp;
+[![License](https://img.shields.io/github/license/SagarBiswas-MultiHAT/WebSource-Harvester.svg)](https://github.com/SagarBiswas-MultiHAT/WebSource-Harvester/blob/main/LICENSE) 
+&nbsp;
+[![Last Commit](https://img.shields.io/github/last-commit/SagarBiswas-MultiHAT/WebSource-Harvester.svg)](https://github.com/SagarBiswas-MultiHAT/WebSource-Harvester/commits) 
+&nbsp;
+[![Open Issues](https://img.shields.io/github/issues/SagarBiswas-MultiHAT/WebSource-Harvester.svg)](https://github.com/SagarBiswas-MultiHAT/WebSource-Harvester/issues) 
+&nbsp;
+[![Top Language](https://img.shields.io/github/languages/top/SagarBiswas-MultiHAT/WebSource-Harvester.svg)](https://github.com/SagarBiswas-MultiHAT/WebSource-Harvester)
+
+</div>
+
 **Author:** @SagarBiswas-MultiHAT \
 **Category:** Educational Web Crawling & Client-Side Security Analysis \
 **Status:** Learning-grade, interview-safe, portfolio-ready
