@@ -22,15 +22,7 @@
 
 ---
 
-![](https://imgur.com/WS98QtD.png)
-
-<br>
-
----
-
 ![after running the project](https://imgur.com/luk0aqV.png)
-
-<br>
 
 ---
 
