@@ -1,0 +1,21 @@
+name: Get started with GitHub Actions
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Confirm workflow setup
+        run: |
+          echo "GitHub Actions is configured."
+          echo "Commit: $GITHUB_SHA"
