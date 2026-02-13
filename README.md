@@ -2,7 +2,7 @@
 
 <div align="right">
 
-[![Actions Status](https://github.com/SagarBiswas-MultiHAT/WebSource-Harvester/actions/workflows/get-started-with-github-actions.yml/badge.svg)](https://github.com/SagarBiswas-MultiHAT/WebSource-Harvester/actions) 
+[![Actions Status](https://github.com/SagarBiswas-MultiHAT/WebSource-Harvester/actions/workflows/github-actions.yml/badge.svg)](https://github.com/SagarBiswas-MultiHAT/WebSource-Harvester/actions) 
 &nbsp;
 [![License](https://img.shields.io/github/license/SagarBiswas-MultiHAT/WebSource-Harvester.svg)](https://github.com/SagarBiswas-MultiHAT/WebSource-Harvester/blob/main/LICENSE) 
 &nbsp;
