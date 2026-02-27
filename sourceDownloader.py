@@ -244,7 +244,7 @@ def rewrite_links(
 # Crawl + Analyze Engine
 # -----------------------------
 
-def crawl_website(base_url: str, min_depth: int, max_depth: int):
+def crawl_website(base_url: str, min_depth: int, max_depth: int, export_urls: bool = False):
     parsed = urlparse(base_url)
     project_dir = parsed.netloc.replace(".", "_")
     os.makedirs(project_dir, exist_ok=True)
@@ -315,6 +315,13 @@ def crawl_website(base_url: str, min_depth: int, max_depth: int):
         except Exception as e:
             print(f"[!] Error at {url}: {e}")
 
+    if export_urls:
+        urls_file = os.path.join(project_dir, "urls.txt")
+        with open(urls_file, "w", encoding="utf-8") as f:
+            for url in sorted(visited):
+                f.write(url + "\n")
+        print(f"[✓] Exported {len(visited)} URLs to {urls_file}")
+
 
 # -----------------------------
 # CLI
@@ -337,6 +344,11 @@ def main():
         default="0",
         help="Crawl depth (e.g. 2 or 1-2)"
     )
+    parser.add_argument(
+        "--export-urls",
+        action="store_true",
+        help="Export visited URLs to urls.txt"
+    )
 
     args = parser.parse_args()
 
@@ -346,7 +358,7 @@ def main():
 
     min_depth, max_depth = parse_depth(args.depth)
 
-    crawl_website(args.url, min_depth, max_depth)
+    crawl_website(args.url, min_depth, max_depth, args.export_urls)
 
 
 if __name__ == "__main__":
