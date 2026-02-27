@@ -244,7 +244,7 @@ def rewrite_links(
 # Crawl + Analyze Engine
 # -----------------------------
 
-def crawl_website(base_url: str, min_depth: int, max_depth: int, export_urls: bool = False):
+def crawl_website(base_url: str, min_depth: int, max_depth: int, export_urls: bool = False, no_download: bool = False):
     parsed = urlparse(base_url)
     project_dir = parsed.netloc.replace(".", "_")
     os.makedirs(project_dir, exist_ok=True)
@@ -292,20 +292,21 @@ def crawl_website(base_url: str, min_depth: int, max_depth: int, export_urls: bo
 
             # Analyze only within selected depth range
             if min_depth <= depth <= max_depth:
-                assets = extract_assets(soup, url)
-                asset_map: dict[str, str] = {}
-                for asset in assets:
-                    local_path = save_file(asset, project_dir)
-                    if local_path:
-                        asset_map[asset] = local_path
+                if not no_download:
+                    assets = extract_assets(soup, url)
+                    asset_map: dict[str, str] = {}
+                    for asset in assets:
+                        local_path = save_file(asset, project_dir)
+                        if local_path:
+                            asset_map[asset] = local_path
 
-                rewrite_links(soup, url, project_dir, asset_map)
+                    rewrite_links(soup, url, project_dir, asset_map)
 
-                page_path = sanitize_path(url, project_dir)
-                os.makedirs(os.path.dirname(page_path), exist_ok=True)
+                    page_path = sanitize_path(url, project_dir)
+                    os.makedirs(os.path.dirname(page_path), exist_ok=True)
 
-                with open(page_path, "w", encoding="utf-8", errors="ignore") as f:
-                    f.write(str(soup))
+                    with open(page_path, "w", encoding="utf-8", errors="ignore") as f:
+                        f.write(str(soup))
 
                 print(f"[✓] Analyzed (depth {depth}): {url}")
 
@@ -349,6 +350,11 @@ def main():
         action="store_true",
         help="Export visited URLs to urls.txt"
     )
+    parser.add_argument(
+        "--no-download",
+        action="store_true",
+        help="Only crawl and export URLs, skip downloading files"
+    )
 
     args = parser.parse_args()
 
@@ -358,7 +364,7 @@ def main():
 
     min_depth, max_depth = parse_depth(args.depth)
 
-    crawl_website(args.url, min_depth, max_depth, args.export_urls)
+    crawl_website(args.url, min_depth, max_depth, args.export_urls, args.no_download)
 
 
 if __name__ == "__main__":
