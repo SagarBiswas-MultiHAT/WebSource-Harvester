@@ -12,7 +12,9 @@ import os
 import sys
 import argparse
 import hashlib
+import threading
 from collections import deque
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from urllib.parse import urljoin, urlparse, unquote
 from urllib.request import Request, urlopen
 from urllib.error import HTTPError, URLError
@@ -22,6 +24,7 @@ from bs4 import BeautifulSoup, FeatureNotFound
 
 USER_AGENT = "Mozilla/5.0 (Educational Website Crawler)"
 TIMEOUT = 10
+visited_lock = threading.Lock()
 
 
 # -----------------------------
@@ -244,77 +247,103 @@ def rewrite_links(
 # Crawl + Analyze Engine
 # -----------------------------
 
-def crawl_website(base_url: str, min_depth: int, max_depth: int, export_urls: bool = False, no_download: bool = False):
+def crawl_page(args):
+    url, depth, base_url, project_dir, min_depth, max_depth, no_download = args
+    
+    with visited_lock:
+        if url in visited or depth > max_depth:
+            return []
+        visited.add(url)
+    
+    try:
+        response = safe_request(url)
+        content_type = response.headers.get("Content-Type", "")
+        normalized_type = content_type.split(";", 1)[0].strip().lower()
+
+        is_xml = url.lower().endswith(".xml") or normalized_type in {"application/xml", "text/xml"}
+        is_html = normalized_type in {"text/html", "application/xhtml+xml"}
+
+        if not is_html and not is_xml:
+            local_path = sanitize_path(url, project_dir, content_type)
+            os.makedirs(os.path.dirname(local_path), exist_ok=True)
+            with open(local_path, "wb") as f:
+                f.write(response.read())
+            print(f"[✓] Saved asset: {url}")
+            return []
+
+        html = response.read()
+        if is_xml:
+            try:
+                soup = BeautifulSoup(html, "xml")
+            except FeatureNotFound:
+                soup = BeautifulSoup(html, "html.parser")
+        else:
+            soup = BeautifulSoup(html, "html.parser")
+
+        new_links = []
+        for link in extract_links(soup, url):
+            if is_same_origin(base_url, link):
+                new_links.append((link, depth + 1))
+
+        if min_depth <= depth <= max_depth:
+            if not no_download:
+                assets = extract_assets(soup, url)
+                asset_map = {}
+                for asset in assets:
+                    local_path = save_file(asset, project_dir)
+                    if local_path:
+                        asset_map[asset] = local_path
+
+                rewrite_links(soup, url, project_dir, asset_map)
+
+                page_path = sanitize_path(url, project_dir)
+                os.makedirs(os.path.dirname(page_path), exist_ok=True)
+                with open(page_path, "w", encoding="utf-8", errors="ignore") as f:
+                    f.write(str(soup))
+
+            print(f"[✓] Analyzed (depth {depth}): {url}")
+        else:
+            print(f"[•] Crawled only (depth {depth}): {url}")
+
+        return new_links
+
+    except Exception as e:
+        print(f"[!] Error at {url}: {e}")
+        return []
+
+
+def crawl_website(base_url: str, min_depth: int, max_depth: int, export_urls: bool = False, no_download: bool = False, threads: int = 1):
+    global visited
+    visited = set()
+    
     parsed = urlparse(base_url)
     project_dir = parsed.netloc.replace(".", "_")
     os.makedirs(project_dir, exist_ok=True)
 
-    visited = set()
     queue = deque([(base_url, 0)])
 
     while queue:
-        url, depth = queue.popleft()
+        batch = []
+        if threads > 1:
+            for _ in range(min(threads, len(queue))):
+                if queue:
+                    batch.append(queue.popleft())
+        else:
+            batch.append(queue.popleft())
 
-        if url in visited or depth > max_depth:
-            continue
-
-        visited.add(url)
-
-        try:
-            response = safe_request(url)
-            content_type = response.headers.get("Content-Type", "")
-            normalized_type = content_type.split(";", 1)[0].strip().lower()
-
-            is_xml = url.lower().endswith(".xml") or normalized_type in {"application/xml", "text/xml"}
-            is_html = normalized_type in {"text/html", "application/xhtml+xml"}
-
-            if not is_html and not is_xml:
-                local_path = sanitize_path(url, project_dir, content_type)
-                os.makedirs(os.path.dirname(local_path), exist_ok=True)
-                with open(local_path, "wb") as f:
-                    f.write(response.read())
-                print(f"[✓] Saved asset: {url}")
-                continue
-
-            html = response.read()
-            if is_xml:
-                try:
-                    soup = BeautifulSoup(html, "xml")
-                except FeatureNotFound:
-                    soup = BeautifulSoup(html, "html.parser")
-            else:
-                soup = BeautifulSoup(html, "html.parser")
-
-            # Crawl links regardless of analysis depth
-            for link in extract_links(soup, url):
-                if is_same_origin(base_url, link):
-                    queue.append((link, depth + 1))
-
-            # Analyze only within selected depth range
-            if min_depth <= depth <= max_depth:
-                if not no_download:
-                    assets = extract_assets(soup, url)
-                    asset_map: dict[str, str] = {}
-                    for asset in assets:
-                        local_path = save_file(asset, project_dir)
-                        if local_path:
-                            asset_map[asset] = local_path
-
-                    rewrite_links(soup, url, project_dir, asset_map)
-
-                    page_path = sanitize_path(url, project_dir)
-                    os.makedirs(os.path.dirname(page_path), exist_ok=True)
-
-                    with open(page_path, "w", encoding="utf-8", errors="ignore") as f:
-                        f.write(str(soup))
-
-                print(f"[✓] Analyzed (depth {depth}): {url}")
-
-            else:
-                print(f"[•] Crawled only (depth {depth}): {url}")
-
-        except Exception as e:
-            print(f"[!] Error at {url}: {e}")
+        if threads > 1 and len(batch) > 1:
+            with ThreadPoolExecutor(max_workers=len(batch)) as executor:
+                futures = [executor.submit(crawl_page, (url, depth, base_url, project_dir, min_depth, max_depth, no_download)) for url, depth in batch]
+                for future in as_completed(futures):
+                    for link, depth in future.result():
+                        if link not in visited and depth <= max_depth:
+                            queue.append((link, depth))
+        else:
+            for url, depth in batch:
+                results = crawl_page((url, depth, base_url, project_dir, min_depth, max_depth, no_download))
+                for link, d in results:
+                    if link not in visited and d <= max_depth:
+                        queue.append((link, d))
 
     if export_urls:
         urls_file = os.path.join(project_dir, "urls.txt")
@@ -355,6 +384,12 @@ def main():
         action="store_true",
         help="Only crawl and export URLs, skip downloading files"
     )
+    parser.add_argument(
+        "--threads",
+        type=int,
+        default=1,
+        help="Number of threads for concurrent crawling (default: 1)"
+    )
 
     args = parser.parse_args()
 
@@ -364,7 +399,7 @@ def main():
 
     min_depth, max_depth = parse_depth(args.depth)
 
-    crawl_website(args.url, min_depth, max_depth, args.export_urls, args.no_download)
+    crawl_website(args.url, min_depth, max_depth, args.export_urls, args.no_download, args.threads)
 
 
 if __name__ == "__main__":
