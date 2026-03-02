@@ -99,6 +99,7 @@ These limitations are **intentional** and make the project accurate and intervie
 - **Query collision handling** via hash suffix
 - **Content-type aware saving** for missing extensions
 - **XML-aware parsing** for sitemaps and RSS
+- **Export visited URLs** (`--export-urls`) to a text file for analysis
 
 ---
 
@@ -178,15 +179,31 @@ Notes:
 ## Usage
 
 ```bash
-python "web-source-code_downloader" <BASE_URL> --depth <DEPTH>
+python sourceDownloader.py <BASE_URL> --depth <DEPTH> [--export-urls]
 ```
 
-Examples:
+### Options
+
+| Option | Description |
+|--------|-------------|
+| `url` | Base URL to crawl (include http:// or https://) |
+| `--depth` | Crawl depth (e.g., `2` or `1-2`). Default: `0` |
+| `--export-urls` | Export all visited URLs to `urls.txt` in the output directory |
+
+### Examples
 
 ```bash
-python "web-source-code_downloader" https://example.com --depth 0
-python "web-source-code_downloader" https://example.com --depth 1
-python "web-source-code_downloader" https://example.com --depth 1-2
+# Crawl only the base URL
+python sourceDownloader.py https://example.com --depth 0
+
+# Crawl base URL and pages directly linked from it
+python sourceDownloader.py https://example.com --depth 1
+
+# Crawl depth 1-2, analyze pages at depth 1 and 2
+python sourceDownloader.py https://example.com --depth 1-2
+
+# Crawl and export all visited URLs to urls.txt
+python sourceDownloader.py https://example.com --depth 2 --export-urls
 ```
 
 ---
@@ -201,9 +218,10 @@ example_com/
 │   ├── js/
 │   ├── images/
 │   └── fonts/
-└── blog/
-    ├── post-1.html
-    └── post-2.html
+├── blog/
+│   ├── post-1.html
+│   └── post-2.html
+└── urls.txt          (when using --export-urls)
 ```
 
 All pages open **offline** without broken CSS or images.
