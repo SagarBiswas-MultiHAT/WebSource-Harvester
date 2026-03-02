@@ -11,6 +11,8 @@
 [![Open Issues](https://img.shields.io/github/issues/SagarBiswas-MultiHAT/WebSource-Harvester.svg)](https://github.com/SagarBiswas-MultiHAT/WebSource-Harvester/issues) 
 &nbsp;
 [![Top Language](https://img.shields.io/github/languages/top/SagarBiswas-MultiHAT/WebSource-Harvester.svg)](https://github.com/SagarBiswas-MultiHAT/WebSource-Harvester)
+&nbsp;
+![Release](https://img.shields.io/github/v/release/SagarBiswas-MultiHAT/WebSource-Harvester)
 
 </div>
 
